@@ -1,0 +1,49 @@
+spawn:1
+
+//ROOM 0
+exits:-1,-1,1,1-
+locked:-1
+item:torch
+enemy:NONE
+
+//ROOM 1
+exits:0,2,3,-1
+locked:-1
+item:NONE
+enemy:NONE
+
+//ROOM 2
+exits:-1,-1,4,1
+locked:-1
+item:sword
+enemy:NONE
+
+//ROOM 3
+exits:1,4,5,-1
+locked:4
+item:key
+enemy:goblin
+
+//ROOM 4
+exits:2,-1,6,3
+locked:3
+item:key
+enemy:NONE
+
+//ROOM 5
+exits:3,6,-1,-1
+locked:-1
+item:shield
+enemy:NONE
+
+//ROOM 6
+exits:4,7,-1,5
+locked:7
+item:NONE
+enemy:goblin
+
+//ROOM 7
+exits:-1,-1,-1,6
+locked:6
+item:NONE
+enemy:dragon
