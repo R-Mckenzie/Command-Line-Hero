@@ -23,12 +23,15 @@ enum QUIT_CONDITION{quit, win, died};
 
 //creates a player with an empty inventory and given spawn point
 PLAYER init_player(int spawn);
+//prints instructions to the game
+void print_instructions();
 //returns true if input == w, a, s or d
 bool move_commanded(std::string input);
 //returns true and moves player if there is an available room in the selected direction
 int move_room(PLAYER in_player, MAP in_map, char move_direction);
 //takes in a series of flags and builds an room description string from them
 std::string build_description(MAP in_map, int new_room, bool has_torch);
+void print_inventory(PLAYER);
 //begins another input loop within the main one, to capture whether the player
 //wants to fight or run
 bool enemy_present(MAP, int);
@@ -43,7 +46,7 @@ int main()
 {
     MAP map=load_map("map_1.map");
     PLAYER player=init_player(map.spawn_room);
-
+    print_instructions();
     std::string input="";
     std::cout<<GREEN<<" >";
     while(std::getline(std::cin, input)){
@@ -61,14 +64,28 @@ int main()
             if(previous_position!=player.position){
                 std::cout<<build_description(map, player.position, player.inventory[item_torch]); 
                 if(map.room_enemies[player.position]!=NO_ENEMY){
+                    if(!player.inventory[item_torch])
+                        exit_game(died);
                     if(!fight_sequence(player, map)){
                         player.position=previous_position; 
-                   }
+                    }else{
+                        map.room_enemies[player.position]=NO_ENEMY;
+                    }
+                }
+                ITEM room_item=map.room_items[player.position];
+                if(room_item!=NO_ITEM){
+                    player.inventory[room_item]=true;
+                    map.room_items[player.position]=NO_ITEM;
+                    std::cout<<"You pick up the "<<YELLOW<<item_names[room_item]<<RESET".\n";
                 }
             }else{
                 std::cout<<"You find a wall in your way.\n";
             }
         } 
+
+        if(input=="i"){
+            print_inventory(player);
+        }
         std::cout<<GREEN<<" >";
     }
 
@@ -79,13 +96,19 @@ PLAYER init_player(int spawn)
 {
     PLAYER player;
     player.position=spawn;
-    for(int i=0; i<ITEM_COUNT; i++)
-        player.inventory[i]=NO_ITEM;
+    for(int i=0; i<ITEM_COUNT; i++){
+        player.inventory[i]=false;
+    }
     std::cout<<"Greetings, adventurer. What is your name?\n "<<GREEN<<">";
     std::cin>>player.name;
     std::cout<<RESET<<"Welcome, "<<player.name<<'\n';
     std::cin.get();
     return player;
+}
+
+void print_instructions()
+{
+    std::cout<<"Input w,a,s,d to move around the map.\nInput 'i' to see your inventory.\n";
 }
 
 int move_room(PLAYER in_player, MAP in_map, char move_direction)
@@ -148,30 +171,50 @@ std::string build_description(MAP map, int new_room, bool has_torch)
     return description;
 }
 
+void print_inventory(PLAYER in_player)
+{
+    std::cout<<"This is your inventory:\n"<<YELLOW;
+    for(int i=0;i<ITEM_COUNT;i++){
+        if(in_player.inventory[i]){
+            std::cout<<item_names[i]<<'\n';
+        }
+    }
+    std::cout<<RESET;
+}
+
 bool fight(PLAYER in_player, ENEMY opponent)
 {
     switch(opponent){
         case enemy_goblin:
+            std::cout<<"The "<<RED<<"goblin"<<RESET<<" charges you...\n";
             if(in_player.inventory[item_sword]){
-                std::cout<<"The "<<RED<<"goblin"<<RESET<<" charges you...\n";
                 std::cout<<"You sidestep it and swing your sword...\n";
                 std::cout<<"You have won the battle!\n";
                 return true;
             }else{
-                //50:50 chance
+                int win_decider=rand();
+                if(win_decider%2==0){
+                    //WIN
+                    std::cout<<"You get lucky and it trips!\n";
+                    std::cout<<"You don't give it a chance to get back up...\n";
+                    return true;
+                }else{
+                    std::cout<<"You don't get out of its way...\nMaybe if you had found a sword you could have done something.\n";
+                }
             }
             break;
         case enemy_dragon:
-            if(in_player.inventory[item_sword]&&in_player.inventory[item_shield]){
-                std::cout<<"The "<<RED<<"dragon"<<RESET<<" rears up and breathes a stream of fire at you...\n";
-                std::cout<<"You hide behind your shield and manage to avoid it...\n";
+            std::cout<<"The "<<RED<<"dragon"<<RESET<<" rears up and breathes a stream of fire at you...\n";
+            if(in_player.inventory[item_shield]){
+                std::cout<<"You hide behind your shield and manage to avoid it!\n";
                 std::cout<<"The "<<RED<<"dragon"<<RESET<<" swoops down and tries to bite you...\n";
-                std::cout<<"You raise your sword and stab it in the neck!\n";
-                
-                return true;
-            }else{
-                //lose
+                if(in_player.inventory[item_sword]){
+                    std::cout<<"You raise your sword and stab it in the neck!\n";
+                    return true;
+                }
+                std::cout<<"You have nothing to stop it with. Maybe if you had found a sword...\n";
             }
+            std::cout<<"You have nothing to hide behind, and are caught directly in the stream of fire...\n";
             break;
         default:
             break;
