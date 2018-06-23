@@ -73,7 +73,7 @@ int main()
                     }
                 }
                 ITEM room_item=map.room_items[player.position];
-                if(room_item!=NO_ITEM){
+                if(room_item!=NO_ITEM && player.inventory[item_torch]){
                     player.inventory[room_item]=true;
                     map.room_items[player.position]=NO_ITEM;
                     std::cout<<"You pick up the "<<YELLOW<<item_names[room_item]<<RESET".\n";
@@ -210,7 +210,7 @@ bool fight(PLAYER in_player, ENEMY opponent)
                 std::cout<<"The "<<RED<<"dragon"<<RESET<<" swoops down and tries to bite you...\n";
                 if(in_player.inventory[item_sword]){
                     std::cout<<"You raise your sword and stab it in the neck!\n";
-                    return true;
+                    exit_game(win);
                 }
                 std::cout<<"You have nothing to stop it with. Maybe if you had found a sword...\n";
             }
