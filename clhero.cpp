@@ -73,10 +73,18 @@ int main()
                     }
                 }
                 ITEM room_item=map.room_items[player.position];
-                if(room_item!=NO_ITEM && player.inventory[item_torch]){
-                    player.inventory[room_item]=true;
-                    map.room_items[player.position]=NO_ITEM;
-                    std::cout<<"You pick up the "<<YELLOW<<item_names[room_item]<<RESET".\n";
+                //TODO: Find a way to DRY this
+                if(room_item!=NO_ITEM ){
+                    if(!player.inventory[item_torch] && room_item==item_torch){
+                        player.inventory[room_item]=true;
+                        map.room_items[player.position]=NO_ITEM;
+                        std::cout<<"You find a "<<YELLOW<<item_names[room_item]<<RESET" burning in the room. You see its use and take it with you.\n";
+                    }
+                    else{
+                        player.inventory[room_item]=true;
+                        map.room_items[player.position]=NO_ITEM;
+                        std::cout<<"You pick up the "<<YELLOW<<item_names[room_item]<<RESET".\n";
+                    }
                 }
             }else{
                 std::cout<<"You find a wall in your way.\n";

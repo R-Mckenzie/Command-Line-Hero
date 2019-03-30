@@ -1,7 +1,7 @@
 spawn:1
 
 //ROOM 0
-exits:-1,-1,1,1-
+exits:-1,-1,1,-1
 locked:-1
 item:torch
 enemy:NONE
